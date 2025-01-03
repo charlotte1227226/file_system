@@ -1,168 +1,192 @@
-#include"FileSystem.h"
-#include"function.h"
+#include "FileSystem.h"
+#include "function.h"
 
-tFileSystem* createFileSystem(int size)
-{
-    tFileSystem *fileSystem;
-    fileSystem = (tFileSystem *)malloc(sizeof(tFileSystem));
-    if (fileSystem)
-    {
-        fileSystem->front = NULL;
-        fileSystem->rear = NULL;
-        fileSystem->count = 0;
+// 創建檔案系統
+tFileSystem* createFileSystem(int size) {
+    tFileSystem* fileSystem = (tFileSystem*)malloc(sizeof(tFileSystem));
+    if (fileSystem) {
+        fileSystem->root = createDirectory(NULL, "root");
         fileSystem->partition_size = size;
         fileSystem->total_inode = size / 1024;
         fileSystem->used_inode = 0;
         fileSystem->total_block = size / 1024;
         fileSystem->used_block = 0;
-        fileSystem->file_block = 0;
         fileSystem->block_size = 1024;
         fileSystem->free_space = size;
     }
     return fileSystem;
 }
 
-tDirectoryNode* enqueue_directory(tFileSystem *FileSystem, tDirectoryNode *target, char* name)
-{
-    tDirectoryNode *newptr = NULL;
-    printf("    Enqueue directory\n");
-    newptr = (tDirectoryNode *)malloc(sizeof(tDirectoryNode));
-    if (newptr == NULL)
-    {
-        printf("    Enqueue directory False!!! \n");
+// 新增目錄
+tDirectoryNode* createDirectory(tDirectoryNode* parent, const char* name) {
+    tDirectoryNode* newDir = (tDirectoryNode*)malloc(sizeof(tDirectoryNode));
+    if (!newDir) {
+        printf("Error: Memory allocation for directory failed.\n");
         return NULL;
     }
-    printf("    Enqueue directory malloc done\n");
-    newptr->name = (char *)malloc(strlen(name) + 1);
-    printf("newptr->name = (char *)malloc(strlen(name) + 1)\n");
-    for(int i = 0; i < strlen(name); i++)
-    {
-        newptr->name[i] = name[i];
-    }
-    printf("newptr->name = %s\n", newptr->name);
-    newptr->level = target->level + 1;
-    printf("newptr->level = target->level + 1\n");
-    newptr->prev = target->prev;
-    printf("newptr->prev = target->prev\n");
-    newptr->next = target;
-    printf("newptr->next = target\n");
-    newptr->file = NULL;
-    printf("newptr->file = NULL\n");
-    target->prev = newptr;
-    printf("    Enqueue directory done\n");
-    if (newptr->prev == NULL)
-    {
-        if(FileSystem->front == target)
-        {
-            FileSystem->front = newptr;
-            printf("FileSystem->front = newptr\n");
-        }
-        return newptr;
-    }
-    else
-    {
-        newptr->prev->next = newptr;
-        printf("newptr->prev->next = newptr\n");
-        return newptr;
-    }
-}
 
-tFileNode* enqueue_file(tFileSystem *FileSystem,tDirectoryNode *target, char *name, char *content)
-{
-    tFileNode *newptr = NULL;
-    newptr = (tFileNode *)malloc(sizeof(tFileNode));
-    if (newptr == NULL)
-    {
-        printf("    Enqueue file False!!! \n");
+    newDir->name = (char*)malloc(strlen(name) + 1);
+    if (!newDir->name) {
+        printf("Error: Memory allocation for directory name failed.\n");
+        free(newDir);
         return NULL;
     }
-    newptr->name = (char *)malloc(strlen(name) + 1);
-    strcpy(newptr->name, name);
-    newptr->content = (char *)malloc(strlen(content) + 1);
-    strcpy(newptr->content, content);
-    newptr->prev = target->file->prev;
-    newptr->next = target->file;
-    target->file->prev = newptr;
-    if (newptr->prev == NULL)
-    {
-        return newptr;
-    }
-    else
-    {
-        newptr->prev->next = newptr;
-        return newptr;
-    }
-}
+    strcpy(newDir->name, name);
+    newDir->parent = parent;
+    newDir->child = NULL;
+    newDir->next_sibling = NULL;
+    newDir->file = NULL;
 
-tDirectoryNode *find_target_directory(tFileSystem *fileSystem, char *name)
-{
-    tDirectoryNode *target = fileSystem->front;
-    while(target != NULL)
-    {
-        if(strcmp(target->name, name) == 0)
-        {
-            return target;
+    if (parent) {
+        if (!parent->child) {
+            parent->child = newDir;
+        } else {
+            tDirectoryNode* sibling = parent->child;
+            while (sibling->next_sibling) {
+                sibling = sibling->next_sibling;
+            }
+            sibling->next_sibling = newDir;
         }
-        target = target->next;
     }
-    return NULL;
+
+    return newDir;
 }
 
-tFileNode *find_target_file(tDirectoryNode *target, char *name)
-{
-    tFileNode *target_file = target->file;
-    while(target_file != NULL)
-    {
-        if(strcmp(target_file->name, name) == 0)
-        {
-            return target_file;
+// 新增檔案
+tFileNode* createFile(tDirectoryNode* dir, const char* name, const char* content) {
+    if (!dir) {
+        printf("Error: Directory does not exist.\n");
+        return NULL;
+    }
+
+    tFileNode* newFile = (tFileNode*)malloc(sizeof(tFileNode));
+    if (!newFile) {
+        printf("Error: Memory allocation for file failed.\n");
+        return NULL;
+    }
+
+    newFile->name = (char*)malloc(strlen(name) + 1);
+    newFile->content = (char*)malloc(strlen(content) + 1);
+
+    if (!newFile->name || !newFile->content) {
+        printf("Error: Memory allocation for file properties failed.\n");
+        free(newFile);
+        return NULL;
+    }
+
+    strcpy(newFile->name, name);
+    strcpy(newFile->content, content);
+    newFile->next = NULL;
+
+    if (!dir->file) {
+        dir->file = newFile;
+    } else {
+        tFileNode* current = dir->file;
+        while (current->next) {
+            current = current->next;
         }
-        target_file = target_file->next;
+        current->next = newFile;
     }
-    return NULL;
+
+    return newFile;
 }
 
-void dequeue_directory(tFileSystem *fileSystem, tDirectoryNode *target)
-{
-    if(target->prev == NULL)
-    {
-        fileSystem->front = target->next;
+// 刪除目錄
+void deleteDirectory(tDirectoryNode* dir) {
+    if (!dir) return;
+
+    // 遞迴刪除子目錄
+    tDirectoryNode* child = dir->child;
+    while (child) {
+        tDirectoryNode* nextChild = child->next_sibling;
+        deleteDirectory(child);
+        child = nextChild;
     }
-    else
-    {
-        target->prev->next = target->next;
+
+    // 刪除檔案
+    tFileNode* file = dir->file;
+    while (file) {
+        tFileNode* nextFile = file->next;
+        free(file->name);
+        free(file->content);
+        free(file);
+        file = nextFile;
     }
-    if(target->next == NULL)
-    {
-        fileSystem->rear = target->prev;
+
+    // 刪除目錄本身
+    if (dir->parent && dir->parent->child == dir) {
+        dir->parent->child = dir->next_sibling;
+    } else if (dir->parent) {
+        tDirectoryNode* sibling = dir->parent->child;
+        while (sibling && sibling->next_sibling != dir) {
+            sibling = sibling->next_sibling;
+        }
+        if (sibling) {
+            sibling->next_sibling = dir->next_sibling;
+        }
     }
-    else
-    {
-        target->next->prev = target->prev;
-    }
-    free(target->name);
-    free(target);
+
+    free(dir->name);
+    free(dir);
 }
 
-void dequeue_file(tFileSystem *FileSystem, tDirectoryNode *target, tFileNode *target_file)
-{
-    if(target_file->prev == NULL)
-    {
-        target->file = target_file->next;
+// 刪除檔案
+void deleteFile(tDirectoryNode* dir, tFileNode* file) {
+    if (!dir || !file) return;
+
+    if (dir->file == file) {
+        dir->file = file->next;
+    } else {
+        tFileNode* current = dir->file;
+        while (current->next && current->next != file) {
+            current = current->next;
+        }
+        if (current->next) {
+            current->next = file->next;
+        }
     }
-    else
-    {
-        target_file->prev->next = target_file->next;
+
+    free(file->name);
+    free(file->content);
+    free(file);
+}
+
+// 顯示目錄內容
+void listDirectory(tDirectoryNode* dir) {
+    if (!dir) {
+        printf("Error: Directory does not exist.\n");
+        return;
     }
-    if(target_file->next == NULL)
-    {
-        target->file->prev = target_file->prev;
+
+    printf("Directories:\n");
+    tDirectoryNode* child = dir->child;
+    while (child) {
+        printf("  %s\n", child->name);
+        child = child->next_sibling;
     }
-    else
-    {
-        target_file->next->prev = target_file->prev;
+
+    printf("Files:\n");
+    tFileNode* file = dir->file;
+    while (file) {
+        printf("  %s\n", file->name);
+        file = file->next;
     }
-    free(target_file->name);
-    free(target_file->content);
-    free(target_file);
+}
+
+// 切換目錄
+tDirectoryNode* changeDirectory(tDirectoryNode* current, const char* name) {
+    if (strcmp(name, "..") == 0) {
+        return current->parent ? current->parent : current;
+    }
+
+    tDirectoryNode* child = current->child;
+    while (child) {
+        if (strcmp(child->name, name) == 0) {
+            return child;
+        }
+        child = child->next_sibling;
+    }
+
+    printf("Error: Directory '%s' not found.\n", name);
+    return current;
 }
