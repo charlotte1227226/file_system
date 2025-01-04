@@ -28,13 +28,13 @@ typedef struct FileSystem {
 } tFileSystem;
 
 tFileSystem* createFileSystem(int size);
-tDirectoryNode* createDirectory(tDirectoryNode* parent, const char* name);
+tDirectoryNode* createDirectory(tFileSystem* FileSystem, tDirectoryNode* parent, const char* name);
 tFileNode* createFile(tDirectoryNode* dir, const char* name, const char* content);
 
 void deleteDirectory(tDirectoryNode* dir);
 void deleteFile(tDirectoryNode* dir, tFileNode* file);
 
 void listDirectory(tDirectoryNode* dir);
-tDirectoryNode* changeDirectory(tDirectoryNode* current, const char* name);
+tDirectoryNode* changeDirectory(tFileSystem* FileSystem, tDirectoryNode* current, const char* name);
 
 #endif

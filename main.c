@@ -26,7 +26,8 @@ int main() {
         getchar(); // 清除緩衝區中的換行符
 
         fileSystem = createFileSystem(size);
-        if (fileSystem) {
+        target = fileSystem->root;
+        if (fileSystem != NULL) {
             printf("Create new partition in memory successfully\n");
             printf("List of commands:\n");
             printf("'ls' - list directory\n");
@@ -58,20 +59,19 @@ int main() {
                     printf("\n");
                     continue;
                 }
-
                 int matched = sscanf(input, "%s %s", command, params);
                 if (matched == 1) {
                     strcpy(params, ""); // 沒有參數，初始化 params
                 }
 
                 if (strcmp(command, "ls") == 0) {
-                    ls(target);
+                    ls(fileSystem, target);
                 } else if (strcmp(command, "cd") == 0) {
-                    target = cd(target, params);
+                    target = cd(fileSystem, target, params);
                 } else if (strcmp(command, "rm") == 0) {
                     rm(target, params);
                 } else if (strcmp(command, "mkdir") == 0) {
-                    mkdir(target, params);
+                    mkdir(fileSystem, target, params);
                 } else if (strcmp(command, "rmdir") == 0) {
                     rmdir(target, params);
                 } else if (strcmp(command, "put") == 0) {

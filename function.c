@@ -1,11 +1,9 @@
 #include "function.h"
 
-void ls(tDirectoryNode* target) {
+void ls(tFileSystem* FileSystem, tDirectoryNode* target) {
     if (target == NULL) {
-        printf("Error: No current directory.\n");
-        return;
+        target = FileSystem->root;
     }
-
     printf("Directories:\n");
     tDirectoryNode* child = target->child;
     while (child) {
@@ -22,26 +20,8 @@ void ls(tDirectoryNode* target) {
     printf("ls done\n");
 }
 
-tDirectoryNode* cd(tDirectoryNode* current, const char* name) {
-    if (strcmp(name, "..") == 0) {
-        if (current->parent == NULL) {
-            printf("This is the root directory\n");
-            return current;
-        } else {
-            return current->parent;
-        }
-    }
-
-    tDirectoryNode* child = current->child;
-    while (child) {
-        if (strcmp(child->name, name) == 0) {
-            return child;
-        }
-        child = child->next_sibling;
-    }
-
-    printf("No such directory\n");
-    return current;
+tDirectoryNode* cd(tFileSystem* FileSystem, tDirectoryNode* current, const char* name) {
+    current = changeDirectory(FileSystem, current, name);
 }
 
 void rm(tDirectoryNode* target, const char* name) {
@@ -68,12 +48,11 @@ void rm(tDirectoryNode* target, const char* name) {
     printf("No such file\n");
 }
 
-void mkdir(tDirectoryNode* target, const char* name) {
+void mkdir(tFileSystem* FileSystem, tDirectoryNode* target, const char* name) {
     if (target == NULL) {
-        printf("Error: No current directory.\n");
-        return;
+        target = FileSystem->root;
     }
-    tDirectoryNode* newDir = createDirectory(target, name);
+    tDirectoryNode* newDir = createDirectory(FileSystem, target, name);
     if (newDir) {
         printf("mkdir done\n");
     } else {
