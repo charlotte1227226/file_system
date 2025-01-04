@@ -154,28 +154,6 @@ void deleteFile(tDirectoryNode* dir, tFileNode* file) {
     free(file);
 }
 
-// 顯示目錄內容
-void listDirectory(tDirectoryNode* dir) {
-    if (dir == NULL) {
-        printf("Error: Directory does not exist.\n");
-        return;
-    }
-
-    printf("Directories:\n");
-    tDirectoryNode* child = dir->child;
-    while (child != NULL) {
-        printf("  %s\n", child->name);
-        child = child->next_sibling;
-    }
-
-    printf("Files:\n");
-    tFileNode* file = dir->file;
-    while (file != NULL) {
-        printf("  %s\n", file->name);
-        file = file->next;
-    }
-}
-
 // 切換目錄
 tDirectoryNode* changeDirectory(tFileSystem* FileSystem, tDirectoryNode* current, const char* name) {
     if (strcmp(name, "..") == 0) {

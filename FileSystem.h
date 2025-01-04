@@ -34,7 +34,6 @@ tFileNode* createFile(tDirectoryNode* dir, const char* name, const char* content
 void deleteDirectory(tDirectoryNode* dir);
 void deleteFile(tDirectoryNode* dir, tFileNode* file);
 
-void listDirectory(tDirectoryNode* dir);
 tDirectoryNode* changeDirectory(tFileSystem* FileSystem, tDirectoryNode* current, const char* name);
 
 #endif

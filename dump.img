@@ -5,25 +5,4 @@
 1024
 2048000
 root
-hello.c
-#include <stdio.h>
-
-int main(void) {
-    printf("HELLO!!\n");
-    return 0;
-}
-
-test.txt
-djhfhdfdfd2d3s1f312sda1f5
-sdahndasdasdmaklsd
-sadl,as
-dasdm
-§Ú¦n«Ó
-·|Ä¹³á
-
-test.c
-#include<stdio.h>
-int main(){
-	printf("test");
-}
-
+popo
