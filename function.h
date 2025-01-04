@@ -15,5 +15,9 @@ void cat(tDirectoryNode *target, const char *name);
 void status(tFileSystem *fileSystem);
 void help();
 void exit_and_img(tFileSystem *fileSystem);
+void storeDumpFile(char* dumpFileName, const char* password, tFileSystem* fileSystem);
+void loadDumpFile(char* dumpFileName, const char* password, tFileSystem* fileSystem);
+void createTextFile(tDirectoryNode* target, const char* name, const char* content);
+void editTextFile(tDirectoryNode* target, const char* name);
 
 #endif
