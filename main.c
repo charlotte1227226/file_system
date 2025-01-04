@@ -63,34 +63,44 @@ int main() {
                 if (matched == 1) {
                     strcpy(params, ""); // 沒有參數，初始化 params
                 }
-
                 if (strcmp(command, "ls") == 0) {
                     ls(fileSystem, target);
-                } else if (strcmp(command, "cd") == 0) {
+                } 
+                else if (strcmp(command, "cd") == 0) {
                     target = cd(fileSystem, target, params);
-                } else if (strcmp(command, "rm") == 0) {
+                } 
+                else if (strcmp(command, "rm") == 0) {
                     rm(target, params);
-                } else if (strcmp(command, "mkdir") == 0) {
+                } 
+                else if (strcmp(command, "mkdir") == 0) {
                     mkdir(fileSystem, target, params);
-                } else if (strcmp(command, "rmdir") == 0) {
+                } 
+                else if (strcmp(command, "rmdir") == 0) {
                     rmdir(target, params);
-                } else if (strcmp(command, "put") == 0) {
-                    printf("Enter file content: ");
-                    char content[100];
-                    fgets(content, sizeof(content), stdin);
-                    content[strcspn(content, "\n")] = 0; // 移除換行符
-                    put(target, params, content);
-                } else if (strcmp(command, "get") == 0) {
+                } 
+                else if (strcmp(command, "put") == 0) {
+                    if(strlen(params) == 0) {
+                        printf("No file name\n");
+                        continue;
+                    }
+                    put(target, params);
+                } 
+                else if (strcmp(command, "get") == 0) {
                     get(target, params);
-                } else if (strcmp(command, "cat") == 0) {
+                } 
+                else if (strcmp(command, "cat") == 0) {
                     cat(target, params);
-                } else if (strcmp(command, "status") == 0) {
+                } 
+                else if (strcmp(command, "status") == 0) {
                     status(fileSystem);
-                } else if (strcmp(command, "help") == 0) {
+                } 
+                else if (strcmp(command, "help") == 0) {
                     help();
-                } else if (strcmp(command, "exit") == 0) {
+                } 
+                else if (strcmp(command, "exit") == 0) {
                     break;
-                } else {
+                } 
+                else {
                     printf("Command not found\n");
                 }
             }
