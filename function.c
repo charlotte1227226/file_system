@@ -123,7 +123,14 @@ void get(tDirectoryNode* target, const char* name) {
     tFileNode* file = target->file;
     while (file != NULL) {
         if (strcmp(file->name, name) == 0) {
-            printf("content: %s\n", file->content);
+            FILE* newFile = fopen(name, "w");
+            if (newFile == NULL) {
+                printf("Error: Failed to create file '%s'.\n", name);
+                return;
+            }
+            fprintf(newFile, "%s", file->content);
+            fclose(newFile);
+            printf("File '%s' saved successfully.\n", name);
             printf("get done\n");
             return;
         }
